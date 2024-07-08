@@ -36,6 +36,7 @@ public class userserviceimpl implements userservice {
 					.build();
 					
 		}
+		
 		user newuser=user.builder()
 				        .firstname(userRequest.getFirstname())
 				        .lastname(userRequest.getLastname())
