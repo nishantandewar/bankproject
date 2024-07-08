@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.nishant.bankproject.dto.AccountInfo;
 import com.nishant.bankproject.dto.bankresponse;
+import com.nishant.bankproject.dto.emaidetails;
 import com.nishant.bankproject.dto.userrequest;
 import com.nishant.bankproject.entity.user;
 import com.nishant.bankproject.repository.userrepository;
@@ -17,6 +18,10 @@ public class userserviceimpl implements userservice {
 	
 	@Autowired
 	userrepository userRepository;
+	
+	@Autowired
+	emailservice emailservice;
+	
 	
 	@Override
 	public bankresponse createaccount(userrequest userRequest) {
@@ -47,6 +52,17 @@ public class userserviceimpl implements userservice {
 				.build();
 		
 		user saveduser=userRepository.save(newuser);
+		
+		//after saving the user info send an email to the user
+		
+		emaidetails emailDetails=emaidetails.builder()
+				.receipent(newuser.getEmail())
+				.messagebody("congratulations! Bank Account created ***:)***")
+				.subject("Account has created. our account number in my bank. Your Accout number is "+ newuser.getAccountnumber())
+				.build();
+		
+		emailservice.emailsender(emailDetails);
+		
 		return bankresponse.builder()
 				.responsecode(accountutils.Account_creation_success)
 				.responsemessage(accountutils.Account_creation_message)
