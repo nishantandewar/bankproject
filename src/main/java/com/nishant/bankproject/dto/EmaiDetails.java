@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class emaidetails {
+public class EmaiDetails {
         private String receipent;
         private String messagebody;
         private String subject;

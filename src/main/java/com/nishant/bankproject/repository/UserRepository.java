@@ -2,8 +2,8 @@ package com.nishant.bankproject.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.nishant.bankproject.entity.user;
+import com.nishant.bankproject.entity.User;
 
-public interface userrepository extends JpaRepository<user,Long> {
+public interface UserRepository extends JpaRepository<User,Long> {
      Boolean existsByEmail(String email);
 }

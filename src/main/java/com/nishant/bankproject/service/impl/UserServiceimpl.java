@@ -6,45 +6,45 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.nishant.bankproject.dto.AccountInfo;
-import com.nishant.bankproject.dto.bankresponse;
-import com.nishant.bankproject.dto.emaidetails;
-import com.nishant.bankproject.dto.userrequest;
-import com.nishant.bankproject.entity.user;
-import com.nishant.bankproject.repository.userrepository;
-import com.nishant.bankproject.utils.accountutils;
+import com.nishant.bankproject.dto.BankResponse;
+import com.nishant.bankproject.dto.EmaiDetails;
+import com.nishant.bankproject.dto.UserRequest;
+import com.nishant.bankproject.entity.User;
+import com.nishant.bankproject.repository.UserRepository;
+import com.nishant.bankproject.utils.AccountUtils;
 @Service
-public class userserviceimpl implements userservice {
+public class UserServiceimpl implements UserService {
     
 	
 	@Autowired
-	userrepository userRepository;
+	UserRepository userRepository;
 	
 	@Autowired
-	emailservice emailservice;
+	EmailService EmailService;
 	
 	
 	@Override
-	public bankresponse createaccount(userrequest userRequest) {
+	public BankResponse createaccount(UserRequest userRequest) {
 		/*
 		 * creating an account means saving the details of user in database
 		 * */
 		if(userRepository.existsByEmail(userRequest.getEmail())){
-			return bankresponse.builder()
-					.responsecode(accountutils.Account_exists_code)
-					.responsemessage(accountutils.Account_exists_message)
+			return BankResponse.builder()
+					.responsecode(AccountUtils.Account_exists_code)
+					.responsemessage(AccountUtils.Account_exists_message)
 					.accountinfo(null)
 					.build();
 					
 		}
 		
-		user newuser=user.builder()
+		User newuser=User.builder()
 				        .firstname(userRequest.getFirstname())
 				        .lastname(userRequest.getLastname())
 				        .othername(userRequest.getOthername())
 				        .gender(userRequest.getGender())
 				        .address(userRequest.getAddress())
 				        .stateoforigin(userRequest.getStateoforigin())
-				        .accountnumber(accountutils.generateaccountnumber())
+				        .accountnumber(AccountUtils.generateaccountnumber())
 				        .accountbalance(BigDecimal.ZERO)
 				        .email(userRequest.getEmail())
 				        .phonenumber(userRequest.getPhonenumber())
@@ -52,21 +52,21 @@ public class userserviceimpl implements userservice {
 				        .status("ACTIVE ")
 				.build();
 		
-		user saveduser=userRepository.save(newuser);
+		User saveduser=userRepository.save(newuser);
 		
 		//after saving the user info send an email to the user
 		
-		emaidetails emailDetails=emaidetails.builder()
+		EmaiDetails emailDetails=EmaiDetails.builder()
 				.receipent(newuser.getEmail())
 				.messagebody("congratulations! Bank Account created ***:)***")
 				.subject("Account has created. our account number in my bank. Your Accout number is "+ newuser.getAccountnumber())
 				.build();
 		
-		emailservice.emailsender(emailDetails);
+		EmailService.emailsender(emailDetails);
 		
-		return bankresponse.builder()
-				.responsecode(accountutils.Account_creation_success)
-				.responsemessage(accountutils.Account_creation_message)
+		return BankResponse.builder()
+				.responsecode(AccountUtils.Account_creation_success)
+				.responsemessage(AccountUtils.Account_creation_message)
 				.accountinfo(AccountInfo.builder()
 						.accountbalance(saveduser.getAccountbalance())
 						.accountnumber(newuser.getAccountnumber())

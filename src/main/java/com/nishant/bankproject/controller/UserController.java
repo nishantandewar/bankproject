@@ -6,20 +6,20 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.nishant.bankproject.dto.bankresponse;
-import com.nishant.bankproject.dto.userrequest;
-import com.nishant.bankproject.service.impl.userservice;
+import com.nishant.bankproject.dto.BankResponse;
+import com.nishant.bankproject.dto.UserRequest;
+import com.nishant.bankproject.service.impl.UserService;
 
 @RestController
 @RequestMapping("/api/user")
-public class usercontroller {
+public class UserController {
   
 	
 	@Autowired 
-	userservice userService;
+	UserService userService;
 	
 	@PostMapping 	
-	public bankresponse createaccount(@RequestBody userrequest userRequest) {
+	public BankResponse createaccount(@RequestBody UserRequest userRequest) {
 		return userService.createaccount(userRequest);
 	}
 }

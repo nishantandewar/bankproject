@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class userrequest {
+public class UserRequest {
   
 	private String firstname;
 	private String lastname;

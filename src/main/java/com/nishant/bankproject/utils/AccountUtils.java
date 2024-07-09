@@ -2,7 +2,7 @@ package com.nishant.bankproject.utils;
 
 import java.time.Year;
 
-public class accountutils {
+public class AccountUtils {
  
 	public static final String Account_exists_code="001";
 	public static final String Account_exists_message="This user has an account";

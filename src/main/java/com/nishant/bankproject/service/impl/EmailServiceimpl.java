@@ -7,10 +7,10 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
-import com.nishant.bankproject.dto.emaidetails;
+import com.nishant.bankproject.dto.EmaiDetails;
 
 @Service
-public class emailserviceimpl implements emailservice {
+public class EmailServiceimpl implements EmailService {
     
 	@Autowired
 	private JavaMailSender javamailsender;
@@ -19,7 +19,7 @@ public class emailserviceimpl implements emailservice {
 	private String sendermail;
 
 	@Override
-	public void emailsender(emaidetails emailDetails) {
+	public void emailsender(EmaiDetails emailDetails) {
 		try {
 			SimpleMailMessage message=new SimpleMailMessage();
 			message.setFrom(sendermail);
