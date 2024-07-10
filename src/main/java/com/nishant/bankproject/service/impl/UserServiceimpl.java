@@ -7,7 +7,9 @@ import org.springframework.stereotype.Service;
 
 import com.nishant.bankproject.dto.AccountInfo;
 import com.nishant.bankproject.dto.BankResponse;
+import com.nishant.bankproject.dto.CreditDebitRequest;
 import com.nishant.bankproject.dto.EmaiDetails;
+import com.nishant.bankproject.dto.EnquiryRequest;
 import com.nishant.bankproject.dto.UserRequest;
 import com.nishant.bankproject.entity.User;
 import com.nishant.bankproject.repository.UserRepository;
@@ -74,6 +76,81 @@ public class UserServiceimpl implements UserService {
 						.build())
 				.build();
 	}
+
+
+	@Override
+	public BankResponse balanceEnquiry(EnquiryRequest request) {
+		Boolean exist=userRepository.existsByAccountnumber(request.getAccountNumber());
+		if(!exist) {
+			BankResponse.builder()
+			.responsecode("404")
+			.responsemessage("accountdoes not exist")
+			.accountinfo(null)
+			.build();
+		}
+		User found=userRepository.findByAccountnumber(request.getAccountNumber());
+		return BankResponse.builder()
+				.responsecode(AccountUtils.Account_exists_code)
+				.responsemessage(AccountUtils.Account_exists_message)
+				.accountinfo(AccountInfo.builder()
+						.accountbalance(found.getAccountbalance())
+						.accountname(found.getFirstname()+" "+found.getLastname())
+						.accountnumber(found.getAccountnumber()	)
+						.build())
+				.build();
+	}
+
+
+	@Override
+	public String nameEnquiry(EnquiryRequest request) {
+		Boolean exist=userRepository.existsByAccountnumber(request.getAccountNumber());
+		if(!exist) {
+			return "user does not exist";
+		}
+		User found=userRepository.findByAccountnumber(request.getAccountNumber());
+		return found.getFirstname()+" "+found.getLastname();
+	}
+
+
+	@Override
+	public BankResponse credit(CreditDebitRequest request) {
+		User user=userRepository.findByAccountnumber(request.getAccountNumber());
+		user.setAccountbalance(user.getAccountbalance().add(request.getAmount()));
+		userRepository.save(user);
+		return BankResponse.builder()
+				.accountinfo(AccountInfo.builder()
+						.accountbalance(user.getAccountbalance())
+						.accountname(user.getFirstname()+" "+user.getLastname())
+						.accountnumber(user.getAccountnumber())
+						.build())
+				.responsecode("Credited")
+				.responsemessage("Successful")
+				.build();
+	}
+
+
+	@Override
+	public BankResponse debit(CreditDebitRequest request) {
+		User user=userRepository.findByAccountnumber(request.getAccountNumber());
+		user.setAccountbalance(user.getAccountbalance().subtract(request.getAmount()));
+		userRepository.save(user);
+		if(request.getAmount().intValue()>user.getAccountbalance().intValue()) {
+			return BankResponse.builder()
+					.accountinfo(null)
+					.responsecode("Error404")
+					.responsemessage("Less BankBalance")
+					.build();
+		}
+		return BankResponse.builder()
+				.accountinfo(AccountInfo.builder()
+						.accountbalance(user.getAccountbalance())
+						.accountname(user.getFirstname()+" "+user.getLastname())
+						.accountnumber(user.getAccountnumber())
+						.build())
+				.responsecode("Credited")
+				.responsemessage("Successful")
+				.build();
+	}	}
   
 	
 	
@@ -99,4 +176,4 @@ public class UserServiceimpl implements UserService {
 	
 	
 	
-}
+
