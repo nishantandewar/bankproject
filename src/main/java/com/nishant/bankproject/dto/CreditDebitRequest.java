@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class CreditDebitRequest {
-
 	private BigDecimal amount;
 	private String accountNumber;
 }
