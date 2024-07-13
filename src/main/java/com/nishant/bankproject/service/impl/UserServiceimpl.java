@@ -10,8 +10,11 @@ import com.nishant.bankproject.dto.BankResponse;
 import com.nishant.bankproject.dto.CreditDebitRequest;
 import com.nishant.bankproject.dto.EmaiDetails;
 import com.nishant.bankproject.dto.EnquiryRequest;
+import com.nishant.bankproject.dto.TransactionRequest;
+import com.nishant.bankproject.dto.TransferRequest;
 import com.nishant.bankproject.dto.UserRequest;
 import com.nishant.bankproject.entity.User;
+import com.nishant.bankproject.repository.TransactionRepository;
 import com.nishant.bankproject.repository.UserRepository;
 import com.nishant.bankproject.utils.AccountUtils;
 @Service
@@ -24,6 +27,8 @@ public class UserServiceimpl implements UserService {
 	@Autowired
 	EmailService EmailService;
 	
+	@Autowired
+	TransactionService transactionService;
 	
 	@Override
 	public BankResponse createaccount(UserRequest userRequest) {
@@ -117,6 +122,15 @@ public class UserServiceimpl implements UserService {
 		User user=userRepository.findByAccountnumber(request.getAccountNumber());
 		user.setAccountbalance(user.getAccountbalance().add(request.getAmount()));
 		userRepository.save(user);
+		
+		//saving Transaction ;)
+		TransactionRequest transactionRequest=TransactionRequest.builder()
+				.AccountNumber(user.getAccountnumber())
+				.TransactionType("CREDIT")
+				.Amount(request.getAmount())
+				.build();
+		
+		transactionService.saveTransaction(transactionRequest);
 		return BankResponse.builder()
 				.accountinfo(AccountInfo.builder()
 						.accountbalance(user.getAccountbalance())
@@ -134,6 +148,14 @@ public class UserServiceimpl implements UserService {
 		User user=userRepository.findByAccountnumber(request.getAccountNumber());
 		user.setAccountbalance(user.getAccountbalance().subtract(request.getAmount()));
 		userRepository.save(user);
+		
+		TransactionRequest transactionRequest=TransactionRequest.builder()
+				.AccountNumber(user.getAccountnumber())
+				.TransactionType("DEBIT")
+				.Amount(request.getAmount())
+				.build();
+		
+		transactionService.saveTransaction(transactionRequest);
 		if(request.getAmount().intValue()>user.getAccountbalance().intValue()) {
 			return BankResponse.builder()
 					.accountinfo(null)
@@ -141,6 +163,7 @@ public class UserServiceimpl implements UserService {
 					.responsemessage("Less BankBalance")
 					.build();
 		}
+		
 		return BankResponse.builder()
 				.accountinfo(AccountInfo.builder()
 						.accountbalance(user.getAccountbalance())
@@ -150,6 +173,47 @@ public class UserServiceimpl implements UserService {
 				.responsecode("Credited")
 				.responsemessage("Successful")
 				.build();
+	}
+
+
+	@Override
+	public BankResponse transfer(TransferRequest request) {
+		boolean isSourceAccountExists=userRepository.existsByAccountnumber(request.getSourceAccountNumber());
+		
+		if(!isSourceAccountExists) {
+		    
+			return BankResponse.builder()
+					.accountinfo(null)
+					.responsecode("72612")
+					.responsemessage(request.getSourceAccountNumber()+" "+AccountUtils.Account_not_exists_message)
+					.build();
+		}
+		User user1=userRepository.findByAccountnumber(request.getSourceAccountNumber());
+		boolean isDestinationAccountExists=userRepository.existsByAccountnumber(request.getSourceAccountNumber());
+		if(!isDestinationAccountExists) {
+			return BankResponse.builder()
+					.accountinfo(null)
+					.responsecode("7261")
+					.responsemessage(request.getDestinationAccountNumber()+" "+AccountUtils.Account_not_exists_message).build();
+		}
+		User user2 =userRepository.findByAccountnumber(request.getDestinationAccountNumber());
+		user1.setAccountbalance(user1.getAccountbalance().subtract(request.getAmount()));
+		user2.setAccountbalance(user2.getAccountbalance().add(request.getAmount()));
+		userRepository.save(user1);
+	    userRepository.save(user2);	
+	    
+	    TransactionRequest transactionRequest=TransactionRequest.builder()
+				.AccountNumber(user1.getAccountnumber())
+				.TransactionType("DEBIT")
+				.Amount(request.getAmount())
+				.status("SUCCESS")
+				.build();
+		
+		transactionService.saveTransaction(transactionRequest);
+		return BankResponse.builder()
+				.accountinfo(null) 
+				.responsecode(AccountUtils.Transfer_success_code)
+				.responsemessage(AccountUtils.Transfer_success_message).build();
 	}	}
   
 	
